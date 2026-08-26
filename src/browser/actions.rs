@@ -113,8 +113,9 @@ pub async fn execute_browser_actions(
             }
 
             BrowserAction::Press { key } => {
+                let escaped_key = key.replace('\\', "\\\\").replace('\'', "\\'");
                 let js = format!(
-                    "window.dispatchEvent(new KeyboardEvent('keydown', {{ key: '{key}' }}));"
+                    "window.dispatchEvent(new KeyboardEvent('keydown', {{ key: '{escaped_key}' }}));"
                 );
                 page.evaluate(js)
                     .await
@@ -152,8 +153,9 @@ pub async fn execute_browser_actions(
                     ));
                 }
 
+                let escaped_sel = selector.replace('\'', "\\'");
                 let js = format!(
-                    "document.querySelector('{selector}')?.scrollIntoView({{ behavior: 'smooth', block: 'center' }});"
+                    "document.querySelector('{escaped_sel}')?.scrollIntoView({{ behavior: 'smooth', block: 'center' }});"
                 );
                 page.evaluate(js).await.map_err(|e| {
                     CrawlerError::ActionFailed("scroll_to".to_string(), e.to_string())

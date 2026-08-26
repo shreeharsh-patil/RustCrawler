@@ -191,32 +191,41 @@ impl TaskQueue for MemoryTaskQueue {
     }
 
     async fn fail(&self, lease: TaskLease, error: TaskFailure) -> Result<(), QueueError> {
-        if let Some((_, (_, original_task, attempt))) = self.active_leases.remove(&lease.lease_id) {
-            if error.is_retryable && attempt < original_task.max_attempts {
-                self.retry(lease, Duration::from_secs(5)).await?;
-            } else {
-                let record = TaskRecord {
-                    task_id: original_task.task_id.clone(),
-                    job_id: original_task.job_id.clone(),
-                    task_type: original_task.task_type,
-                    payload: original_task.payload.clone(),
-                    priority: original_task.priority,
-                    attempt,
-                    max_attempts: original_task.max_attempts,
-                    status: TaskStatus::DeadLetter,
-                    lease_owner: None,
-                    lease_expiry: None,
-                    created_at: Utc::now().timestamp() as u64,
-                    available_at: 0,
-                    error: Some(error.error_message),
-                };
-                self.dlq.insert(record.task_id.clone(), record);
-                self.failed_count
-                    .fetch_add(1, std::sync::atomic::Ordering::Relaxed);
-            }
+        let (is_retryable, attempt, max_attempts) = match self.active_leases.get(&lease.lease_id) {
+            Some(entry) => (
+                error.is_retryable,
+                entry.value().2,
+                entry.value().1.max_attempts,
+            ),
+            None => return Err(QueueError::LeaseExpired(lease.lease_id)),
+        };
+
+        if is_retryable && attempt < max_attempts {
+            self.retry(lease, Duration::from_secs(5)).await
+        } else if let Some((_, (_, original_task, attempt))) =
+            self.active_leases.remove(&lease.lease_id)
+        {
+            let record = TaskRecord {
+                task_id: original_task.task_id.clone(),
+                job_id: original_task.job_id.clone(),
+                task_type: original_task.task_type,
+                payload: original_task.payload.clone(),
+                priority: original_task.priority,
+                attempt,
+                max_attempts: original_task.max_attempts,
+                status: TaskStatus::DeadLetter,
+                lease_owner: None,
+                lease_expiry: None,
+                created_at: Utc::now().timestamp() as u64,
+                available_at: 0,
+                error: Some(error.error_message),
+            };
+            self.dlq.insert(record.task_id.clone(), record);
+            self.failed_count
+                .fetch_add(1, std::sync::atomic::Ordering::Relaxed);
             Ok(())
         } else {
-            Ok(())
+            Err(QueueError::LeaseExpired(lease.lease_id))
         }
     }
 
@@ -294,5 +303,74 @@ impl TaskQueue for MemoryTaskQueue {
         } else {
             Ok(false)
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::distributed::models::{TaskPriority, TaskType, WorkerType};
+
+    #[tokio::test]
+    async fn test_fail_retryable_reenqueues_task() {
+        let queue = MemoryTaskQueue::default();
+        let task = QueuedTask::new(
+            "job_1",
+            TaskType::HttpFetch,
+            serde_json::json!({"url": "https://example.com"}),
+            TaskPriority::Normal,
+            3,
+        );
+
+        queue.enqueue(task).await.unwrap();
+
+        // 1. Reserve the task
+        let lease = queue
+            .reserve("worker_1", WorkerType::Http, Duration::from_secs(30))
+            .await
+            .unwrap()
+            .expect("Task should be reserved");
+
+        // 2. Fail with retryable error
+        let failure = TaskFailure {
+            error_message: "Connection reset by peer".to_string(),
+            is_retryable: true,
+        };
+        queue.fail(lease, failure).await.unwrap();
+
+        // Check stats: task should be back in queue, not in DLQ
+        let stats = queue.stats().await.unwrap();
+        assert_eq!(stats.dlq_total, 0, "Task should not be in DLQ yet");
+        assert_eq!(stats.queued_total, 1, "Task should be re-enqueued for retry");
+    }
+
+    #[tokio::test]
+    async fn test_fail_non_retryable_moves_to_dlq() {
+        let queue = MemoryTaskQueue::default();
+        let task = QueuedTask::new(
+            "job_1",
+            TaskType::HttpFetch,
+            serde_json::json!({"url": "https://example.com"}),
+            TaskPriority::Normal,
+            3,
+        );
+
+        queue.enqueue(task).await.unwrap();
+
+        let lease = queue
+            .reserve("worker_1", WorkerType::Http, Duration::from_secs(30))
+            .await
+            .unwrap()
+            .expect("Task should be reserved");
+
+        let failure = TaskFailure {
+            error_message: "404 Not Found".to_string(),
+            is_retryable: false,
+        };
+        queue.fail(lease, failure).await.unwrap();
+
+        let stats = queue.stats().await.unwrap();
+        assert_eq!(stats.dlq_total, 1, "Non-retryable failure must move to DLQ");
+        assert_eq!(stats.queued_total, 0);
     }
 }

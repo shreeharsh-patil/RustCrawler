@@ -471,15 +471,22 @@ fn extract_entities_from_task(task: &str) -> Vec<String> {
     let lower = task.to_lowercase();
     let mut entities = Vec::new();
 
-    let cleaned = if let Some(idx) = lower.find("compare") {
-        &task[idx + 7..]
-    } else if let Some(idx) = lower.find("comparison of") {
-        &task[idx + 13..]
-    } else if let Some(idx) = lower.find("between") {
-        &task[idx + 7..]
-    } else {
-        task
-    };
+    let prefixes = [
+        ("comparison of", 13),
+        ("compare", 7),
+        ("between", 7),
+    ];
+
+    let mut cleaned = task;
+    for (prefix, len) in prefixes {
+        if let Some(pos) = lower.find(prefix) {
+            let target_char_idx = lower[..pos + len].chars().count();
+            if let Some((byte_offset, _)) = task.char_indices().nth(target_char_idx) {
+                cleaned = &task[byte_offset..];
+            }
+            break;
+        }
+    }
 
     let normalized = cleaned
         .replace(" vs. ", " | ")

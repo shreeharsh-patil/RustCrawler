@@ -71,7 +71,7 @@ impl ResearchSynthesizer {
         Ok(self.synthesize_deterministic(req, store))
     }
 
-    fn synthesize_deterministic(
+    pub fn synthesize_deterministic(
         &self,
         req: &AgentRequest,
         store: &EvidenceStore,

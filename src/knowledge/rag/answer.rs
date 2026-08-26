@@ -123,8 +123,11 @@ impl RagAnswerService {
         for cid in cited_ids {
             if seen_cids.insert(cid.clone()) {
                 if let Some(matched_chunk) = valid_chunk_map.get(&cid) {
-                    let snippet = if matched_chunk.text.len() > 150 {
-                        format!("{}...", &matched_chunk.text[..150])
+                    let snippet = if matched_chunk.text.chars().count() > 150 {
+                        format!(
+                            "{}...",
+                            matched_chunk.text.chars().take(150).collect::<String>()
+                        )
                     } else {
                         matched_chunk.text.clone()
                     };

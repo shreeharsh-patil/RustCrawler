@@ -113,9 +113,21 @@ impl LocalSearchIndex {
 fn generate_snippet(full_text: &str, query_tokens: &[String]) -> String {
     let lower = full_text.to_lowercase();
     for token in query_tokens {
-        if let Some(pos) = lower.find(token) {
-            let start = pos.saturating_sub(40);
-            let end = (pos + token.len() + 80).min(full_text.len());
+        let token_lower = token.to_lowercase();
+        if let Some(pos) = lower.find(&token_lower) {
+            let start = full_text
+                .char_indices()
+                .map(|(idx, _)| idx)
+                .rfind(|&idx| idx <= pos.saturating_sub(40))
+                .unwrap_or(0);
+
+            let target_end = pos + token.len() + 80;
+            let end = full_text
+                .char_indices()
+                .map(|(idx, _)| idx)
+                .find(|&idx| idx >= target_end)
+                .unwrap_or(full_text.len());
+
             let slice = &full_text[start..end];
             let prefix = if start > 0 { "..." } else { "" };
             let suffix = if end < full_text.len() { "..." } else { "" };
@@ -123,9 +135,28 @@ fn generate_snippet(full_text: &str, query_tokens: &[String]) -> String {
         }
     }
 
-    if full_text.len() > 150 {
-        format!("{}...", full_text[..150].trim().replace('\n', " "))
+    if full_text.chars().count() > 150 {
+        let truncated: String = full_text.chars().take(150).collect();
+        format!("{}...", truncated.trim().replace('\n', " "))
     } else {
         full_text.trim().replace('\n', " ")
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_generate_snippet_unicode_safe() {
+        // Multi-byte Unicode characters (e.g. Japanese, emojis, accented characters)
+        let unicode_text = "Rustは高性能で並行処理に優れたシステムプログラミング言語です。🦀✨ 安全性と速度を両立しています。";
+        let tokens = vec!["並行処理".to_string()];
+        let snippet = generate_snippet(unicode_text, &tokens);
+        assert!(snippet.contains("並行処理"));
+
+        let emoji_long_text = "🚀".repeat(200);
+        let fallback_snippet = generate_snippet(&emoji_long_text, &["nonexistent".to_string()]);
+        assert!(fallback_snippet.ends_with("..."));
     }
 }

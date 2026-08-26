@@ -10,6 +10,7 @@ use crate::crawl::worker::process_crawl_target;
 use crate::error::CrawlerError;
 use crate::service::ScraperService;
 use crate::utils::urls::validate_url_syntax;
+use chrono::Utc;
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::sync::Arc;
 use std::time::Duration;
@@ -278,12 +279,5 @@ pub async fn execute_crawl(
 }
 
 fn chrono_or_now() -> String {
-    // Return standard ISO 8601 UTC timestamp using std SystemTime
-    match std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH) {
-        Ok(dur) => {
-            let secs = dur.as_secs();
-            format!("{secs}")
-        }
-        Err(_) => "0".to_string(),
-    }
+    Utc::now().to_rfc3339()
 }

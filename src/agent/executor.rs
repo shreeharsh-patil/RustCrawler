@@ -6,7 +6,7 @@ use serde_json::json;
 use crate::agent::citations::CitationValidator;
 use crate::agent::evaluator::EvidenceGapEvaluator;
 use crate::agent::evidence::Evidence;
-use crate::agent::models::{AgentConfidence, AgentRequest, AgentResult, AgentStatus};
+use crate::agent::models::{AgentRequest, AgentResult, AgentStatus};
 use crate::agent::planner::AgentPlanner;
 use crate::agent::policy::AgentPolicy;
 use crate::agent::state::AgentState;
@@ -250,23 +250,8 @@ impl AgentExecutor {
             Ok(out) => out,
             Err(e) => {
                 warnings.push(format!("LLM synthesis fallback: {e}"));
-                // Fallback to deterministic synthesis output
                 self.synthesizer
-                    .synthesize(&req, &plan, &state.evidence)
-                    .await
-                    .unwrap_or_else(|_| crate::agent::synthesis::SynthesisOutput {
-                        data: None,
-                        text_answer: Some("Synthesis could not be completed.".to_string()),
-                        markdown_answer: Some("Synthesis could not be completed.".to_string()),
-                        raw_content: "Failed".to_string(),
-                        claims: Vec::new(),
-                        confidence: AgentConfidence {
-                            overall: "low".to_string(),
-                            missing_fields: Vec::new(),
-                            conflicts: 0,
-                            score: 0.0,
-                        },
-                    })
+                    .synthesize_deterministic(&req, &state.evidence)
             }
         };
 

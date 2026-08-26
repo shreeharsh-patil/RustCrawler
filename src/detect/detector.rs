@@ -276,9 +276,7 @@ fn detect_bom(body: &[u8]) -> (Option<String>, &[u8]) {
 }
 
 fn is_json_content(trimmed: &str, full_body: &[u8]) -> bool {
-    if (trimmed.starts_with('{') && trimmed.ends_with('}'))
-        || (trimmed.starts_with('[') && trimmed.ends_with(']'))
-    {
+    if trimmed.starts_with('{') || trimmed.starts_with('[') {
         return serde_json::from_slice::<serde_json::Value>(full_body).is_ok();
     }
     false
@@ -352,4 +350,36 @@ fn is_printable_text(bytes: &[u8]) -> bool {
         .count();
 
     (non_printable as f32 / bytes.len() as f32) < 0.05
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_detect_large_json_document() {
+        let mut large_json = String::from("{\"items\": [");
+        for i in 0..1000 {
+            large_json.push_str(&format!("{{\"id\": {i}, \"name\": \"item_{i}\"}},"));
+        }
+        large_json.pop(); // remove trailing comma
+        large_json.push_str("]}");
+
+        assert!(large_json.len() > 10000, "Should be larger than 8KB prefix window");
+
+        let url = Url::parse("http://example.com/data").unwrap();
+        let detected = ContentDetector::detect(&url, None, large_json.as_bytes());
+
+        assert_eq!(detected.document_type, DocumentType::Json);
+        assert_eq!(detected.mime_type, "application/json");
+    }
+
+    #[test]
+    fn test_detect_pdf_magic_bytes() {
+        let pdf_bytes = b"%PDF-1.7\n%raw binary content";
+        let url = Url::parse("http://example.com/download").unwrap();
+        let detected = ContentDetector::detect(&url, None, pdf_bytes);
+
+        assert_eq!(detected.document_type, DocumentType::Pdf);
+    }
 }

@@ -273,8 +273,8 @@ fn extract_json_candidates(
                 };
 
                 let excerpt = serde_json::to_string(v).ok().map(|s| {
-                    if s.len() > 120 {
-                        format!("{}...", &s[..120])
+                    if s.chars().count() > 120 {
+                        format!("{}...", s.chars().take(120).collect::<String>())
                     } else {
                         s
                     }

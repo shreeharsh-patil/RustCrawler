@@ -609,8 +609,7 @@ fn parse_markdown_blocks(markdown: &str) -> Vec<ParsedBlock> {
         if trimmed.starts_with("* ")
             || trimmed.starts_with("- ")
             || trimmed.starts_with("+ ")
-            || (trimmed.chars().next().is_some_and(|c| c.is_ascii_digit())
-                && trimmed.contains(". "))
+            || is_ordered_list_item(trimmed)
         {
             let mut list_lines = vec![line];
             while let Some(next_line) = lines.peek() {
@@ -618,11 +617,7 @@ fn parse_markdown_blocks(markdown: &str) -> Vec<ParsedBlock> {
                 if next_trimmed.starts_with("* ")
                     || next_trimmed.starts_with("- ")
                     || next_trimmed.starts_with("+ ")
-                    || (next_trimmed
-                        .chars()
-                        .next()
-                        .is_some_and(|c| c.is_ascii_digit())
-                        && next_trimmed.contains(". "))
+                    || is_ordered_list_item(next_trimmed)
                     || (next_line.starts_with("  ") && !next_trimmed.is_empty())
                 {
                     list_lines.push(lines.next().unwrap());
@@ -646,6 +641,7 @@ fn parse_markdown_blocks(markdown: &str) -> Vec<ParsedBlock> {
                 || next_trimmed.starts_with("* ")
                 || next_trimmed.starts_with("- ")
                 || next_trimmed.starts_with("+ ")
+                || is_ordered_list_item(next_trimmed)
             {
                 break;
             }
@@ -655,6 +651,21 @@ fn parse_markdown_blocks(markdown: &str) -> Vec<ParsedBlock> {
     }
 
     blocks
+}
+
+fn is_ordered_list_item(s: &str) -> bool {
+    let mut chars = s.chars();
+    let mut digit_count = 0;
+    while let Some(c) = chars.next() {
+        if c.is_ascii_digit() {
+            digit_count += 1;
+        } else if c == '.' && digit_count > 0 {
+            return chars.next() == Some(' ');
+        } else {
+            return false;
+        }
+    }
+    false
 }
 
 fn split_oversized_text(
@@ -785,5 +796,27 @@ fn execute_crawl() -> Result<(), CrawlerError> {
             .find(|c| c.text.contains("execute_crawl"))
             .expect("Code chunk should exist");
         assert_eq!(code_chunk.metadata.code_lang, Some("rust".to_string()));
+    }
+
+    #[test]
+    fn test_structural_chunker_ordered_lists() {
+        let markdown = r#"# Getting Started
+
+Follow these installation steps:
+1. Clone the repository with git.
+2. Run cargo build --release.
+3. Start the server with ./target/release/rustcrawl serve.
+"#;
+
+        let chunker = StructuralChunker::with_default_tokenizer(ChunkingConfig {
+            target_tokens: 100,
+            max_tokens: 200,
+            min_tokens: 10,
+            overlap_tokens: 0,
+        });
+
+        let chunks = chunker.chunk_markdown("doc_2", None, markdown);
+        assert!(!chunks.is_empty());
+        assert!(chunks.iter().any(|c| c.text.contains("1. Clone the repository")));
     }
 }
