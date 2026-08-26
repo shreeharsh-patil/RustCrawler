@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Code Snippets Fixture</title>
+</head>
+<body>
+    <article>
+        <h1>Code Formatting Examples</h1>
+        <p>Inline expressions like <code>let x = 42;</code> should be preserved as backtick inline code.</p>
+
+        <h2>Rust Code Block</h2>
+        <pre><code class="language-rust">// Rust TCP Listener Example
+use tokio::net::TcpListener;
+
+async fn run_server() -> std::io::Result<()> {
+    let listener = TcpListener::bind("127.0.0.1:8080").await?;
+    loop {
+        let (socket, _) = listener.accept().await?;
+        tokio::spawn(async move {
+            process(socket).await;
+        });
+    }
+}</code></pre>
+
+        <h2>Python Code Block</h2>
+        <pre><code class="lang-python">import asyncio
+
+async def main():
+    print("Async Python execution")
+
+asyncio.run(main())</code></pre>
+    </article>
+</body>
+</html>

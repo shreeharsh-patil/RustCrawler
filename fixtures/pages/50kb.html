@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>50KB Benchmark Page - High Throughput Web Scraping</title>
+</head>
+<body>
+    <header>
+        <nav><a href="/">Home</a> | <a href="/docs">Docs</a> | <a href="/contact">Contact</a></nav>
+    </header>
+    <main>
+        <article>
+            <h1>High-Throughput Web Scraping in Rust</h1>
+            <p>Rust provides low-level control with high-level ergonomics, making it ideal for web crawling pipelines.</p>
+            <!-- Repeating sections to fill 50KB -->
+            <section>
+                <h2>Section 1: Asynchronous Architecture</h2>
+                <p>Tokio drives the asynchronous execution pool. By handling epoll/kqueue/IOCP underneath, it achieves high I/O concurrency with minimal thread switching overhead.</p>
+                <ul>
+                    <li>Feature 1: Non-blocking HTTP sockets</li>
+                    <li>Feature 2: Connection pool reuse</li>
+                    <li>Feature 3: Streaming chunk parser</li>
+                </ul>
+                <table>
+                    <thead><tr><th>Metric</th><th>Target</th><th>Achieved</th></tr></thead>
+                    <tbody>
+                        <tr><td>Latency</td><td>&lt; 50ms</td><td>12ms</td></tr>
+                        <tr><td>Memory</td><td>&lt; 50MB</td><td>18MB</td></tr>
+                    </tbody>
+                </table>
+            </section>
+            <section>
+                <h2>Section 2: DOM Parsing and Traversal</h2>
+                <p>Using html5ever and scraper provides spec-compliant HTML5 parsing while maintaining fast DOM tree construction.</p>
+                <pre><code class="language-rust">fn parse_dom(html: &str) -> ScrapeResult {
+    // High performance DOM parsing
+    let doc = ParsedDocument::new(html);
+    doc.extract()
+}</code></pre>
+            </section>
+            <section>
+                <h2>Section 3: Security & SSRF Mitigation</h2>
+                <p>SSRF mitigation is implemented by resolving hostnames prior to TCP socket connection and checking every resolved IP against RFC-defined private and link-local ranges.</p>
+            </section>
+            <!-- Filler content -->
+            <div class="content-body">
+                <p>Detailed technical documentation continued across multiple paragraphs to simulate realistic medium-sized technical articles and documentation pages.</p>
+                <p>Modern web scrapers must navigate complex DOM structures, extract relevant text, strip irrelevant navigational boilerplate, and format the output into clean markdown suitable for LLM ingestion and retrieval-augmented generation systems.</p>
+                <p>Rust's strong type system and ownership model guarantee thread safety across concurrent scraping workers without data races or garbage collector pauses.</p>
+                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. Praesent libero. Sed cursus ante dapibus diam. Sed nisi. Nulla quis sem at nibh elementum imperdiet. Duis sagittis ipsum. Praesent mauris. Fusce nec tellus sed augue semper porta. Mauris massa. Vestibulum lacinia arcu eget nulla. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.</p>
+                <p>Curabitur sodales ligula in libero. Sed dignissim lacinia nunc. Curabitur tortor. Pellentesque nibh. Aenean quam. In scelerisque sem at dolor. Maecenas mattis. Sed convallis tristique sem. Proin ut ligula vel nunc egestas porttitor. Morbi lectus risus, iaculis vel, suscipit quis, luctus non, massa. Fusce ac turpis quis ligula lacinia aliquet.</p>
+                <p>Mauris ipsum. Nulla metus metus, ullamcorper vel, tincidunt sed, euismod in, nibh. Quisque volutpat condimentum velit. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Nam nec ante. Sed lacinia, urna non tincidunt mattis, tortor neque adipiscing diam, a cursus ipsum ante quis turpis. Nulla facilisi. Ut fringilla. Suspendisse potenti. Nunc feugiat mi a tellus consequat imperdiet. Vestibulum sapien. Proin quam.</p>
+                <p>Etiam ultrices. Suspendisse in justo eu magna luctus suscipit. Sed lectus. Integer euismod lacus luctus magna. Quisque cursus, metus vitae pharetra auctor, sem massa mattis sem, at interdum magna augue eget diam. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Morbi lacinia molestie dui. Praesent blandit dolor. Sed non quam. In vel mi sit amet augue congue elementum. Morbi in ipsum sit amet pede facilisis laoreet. Donec lacus nunc, viverra nec, blandit vel, egestas et, augue.</p>
+                <p>Vestibulum tincidunt malesuada tellus. Ut ultrices ultrices enim. Curabitur sit amet mauris. Morbi in dui quis est pulvinar ullamcorper. Nulla facilisi. Integer lacinia sollicitudin massa. Cras metus. Sed aliquet risus a tortor. Integer id quam. Morbi mi. Quisque nisl felis, venenatis tristique, dignissim in, ultrices sit amet, augue. Proin sodales libero eget ante.</p>
+                <p>Pellentesque commodo eros a enim. Vestibulum turpis sem, aliquet eget, lobortis pellentesque, rutrum eu, nisl. Sed libero. Aliquam erat volutpat. Etiam vitae tortor. Morbi vestibulum volutpat enim. Aliquam eu nunc. Nunc sed turpis. Sed mollis, eros et ultrices tempus, mauris ipsum aliquam libero, non adipiscing dolor urna a orci. Nulla porta dolor. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.</p>
+                <p>Curabitur sodales ligula in libero. Sed dignissim lacinia nunc. Curabitur tortor. Pellentesque nibh. Aenean quam. In scelerisque sem at dolor. Maecenas mattis. Sed convallis tristique sem. Proin ut ligula vel nunc egestas porttitor. Morbi lectus risus, iaculis vel, suscipit quis, luctus non, massa. Fusce ac turpis quis ligula lacinia aliquet.</p>
+                <p>Mauris ipsum. Nulla metus metus, ullamcorper vel, tincidunt sed, euismod in, nibh. Quisque volutpat condimentum velit. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Nam nec ante. Sed lacinia, urna non tincidunt mattis, tortor neque adipiscing diam, a cursus ipsum ante quis turpis. Nulla facilisi. Ut fringilla. Suspendisse potenti. Nunc feugiat mi a tellus consequat imperdiet. Vestibulum sapien. Proin quam.</p>
+                <p>Etiam ultrices. Suspendisse in justo eu magna luctus suscipit. Sed lectus. Integer euismod lacus luctus magna. Quisque cursus, metus vitae pharetra auctor, sem massa mattis sem, at interdum magna augue eget diam. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Morbi lacinia molestie dui. Praesent blandit dolor. Sed non quam. In vel mi sit amet augue congue elementum. Morbi in ipsum sit amet pede facilisis laoreet. Donec lacus nunc, viverra nec, blandit vel, egestas et, augue.</p>
+                <p>Vestibulum tincidunt malesuada tellus. Ut ultrices ultrices enim. Curabitur sit amet mauris. Morbi in dui quis est pulvinar ullamcorper. Nulla facilisi. Integer lacinia sollicitudin massa. Cras metus. Sed aliquet risus a tortor. Integer id quam. Morbi mi. Quisque nisl felis, venenatis tristique, dignissim in, ultrices sit amet, augue. Proin sodales libero eget ante.</p>
+            </div>
+        </article>
+    </main>
+    <footer>
+        <p>&copy; 2026 RustCrawl Benchmark</p>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Messy Ad-Heavy Web Page</title>
+    <style>
+        .ad { color: red; }
+        .hidden { display: none; }
+    </style>
+    <script>
+        console.log("Tracking user session");
+    </script>
+</head>
+<body>
+    <div id="cookie-consent-modal" class="cookie-popup" aria-hidden="false">
+        <p>We use cookies to enhance your tracking experience.</p>
+        <button onclick="accept()">Accept All</button>
+    </div>
+
+    <header id="site-header">
+        <div class="top-nav">
+            <a href="javascript:void(0)">Menu</a>
+            <a href="mailto:ads@example.com">Advertise</a>
+        </div>
+    </header>
+
+    <div class="banner-ad advert">
+        <img src="/track.gif" width="1" height="1" alt="pixel" />
+        <a href="https://sponsor.com">Buy Now!</a>
+    </div>
+
+    <article class="main-article post-content">
+        <h1>Clean Content Emerges From Messy HTML</h1>
+        <p>This is the legitimate, meaningful article content that readers came to see.</p>
+        <p>Even though there are ads, popups, and scripts surrounding this content, our readability extractor extracts this faithfully.</p>
+    </article>
+
+    <div class="sidebar ads">
+        <h4>Sponsored Links</h4>
+        <ul>
+            <li><a href="/ad1">Ad 1</a></li>
+            <li><a href="/ad2">Ad 2</a></li>
+        </ul>
+    </div>
+
+    <footer class="footer-nav">
+        <p>&copy; 2026 Messy Corp. <a href="/privacy">Privacy Policy</a></p>
+    </footer>
+</body>
+</html>

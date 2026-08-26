@@ -1,0 +1,91 @@
+[package]
+name = "rustcrawl"
+version = "0.1.0"
+edition = "2021"
+authors = ["Antigravity Team"]
+description = "Production-grade lightweight web-to-data engine and scraper in Rust"
+readme = "README.md"
+default-run = "rustcrawl"
+
+[dependencies]
+# Async runtime
+tokio = { version = "1.40", features = ["full"] }
+tokio-util = "0.7"
+tokio-stream = { version = "0.1", features = ["sync"] }
+
+# Web Framework
+axum = { version = "0.7", features = ["macros"] }
+tower = { version = "0.5", features = ["util"] }
+tower-http = { version = "0.6", features = ["trace", "cors", "timeout"] }
+
+# HTTP Client (using native-tls / default-tls for Windows schannel compatibility)
+reqwest = { version = "0.12", default-features = false, features = [
+    "default-tls",
+    "gzip",
+    "brotli",
+    "deflate",
+    "stream",
+    "http2",
+    "json",
+] }
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+quick-xml = { version = "0.37", features = ["serialize"] }
+
+# HTML Parsing
+scraper = "0.22"
+html5ever = "0.29"
+ego-tree = "0.10"
+
+# URLs and Networking
+url = { version = "2.5", features = ["serde"] }
+ipnet = "2.10"
+
+# Encoding support
+encoding_rs = "0.8"
+
+# Logging & Tracing
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt", "json"] }
+
+# CLI & Configuration
+clap = { version = "4.5", features = ["derive", "env"] }
+
+# Concurrent structures
+dashmap = "6.1"
+
+# Errors
+thiserror = "2.0"
+
+# Async Trait and Futures
+async-trait = "0.1"
+futures = "0.3"
+
+# Browser & CDP
+chromiumoxide = { version = "0.7", default-features = false, features = ["tokio-runtime"] }
+which = "6.0"
+
+# Phase 4 Document Parsers & Utilities
+blake3 = "1.5"
+csv = "1.3"
+zip = { version = "2.2", default-features = false, features = ["deflate"] }
+lopdf = "0.34"
+serde_json_path = "0.7"
+bytes = "1.7"
+uuid = { version = "1.10", features = ["v4", "serde"] }
+chrono = { version = "0.4", default-features = false, features = ["std", "clock", "serde"] }
+flate2 = "1.0"
+hmac = "0.12"
+sha2 = "0.10"
+hex = "0.4"
+redis = { version = "0.27", default-features = false, features = ["tokio-comp", "connection-manager", "aio"] }
+
+[dev-dependencies]
+criterion = { version = "0.5", features = ["async_tokio"] }
+tokio-test = "0.4"
+
+[[bench]]
+name = "scraping_benchmark"
+harness = false

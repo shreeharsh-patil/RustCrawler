@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Relative Link Resolution Test</title>
+</head>
+<body>
+    <div id="links">
+        <a href="/root-page">Root Link</a>
+        <a href="sibling-page.html">Sibling Link</a>
+        <a href="../parent-page.html">Parent Link</a>
+        <a href="./current-page.html">Current Link</a>
+        <a href="?query=param">Query Only</a>
+        <a href="#hash-target">Hash Only</a>
+        <a href="//cdn.example.com/asset.js">Protocol Relative</a>
+        <a href="https://external.org/page">External Absolute</a>
+        <a href="javascript:alert('evil')">JavaScript Scheme</a>
+        <a href="mailto:contact@example.com">Mailto Scheme</a>
+        <a href="tel:+123456789">Tel Scheme</a>
+    </div>
+</body>
+</html>

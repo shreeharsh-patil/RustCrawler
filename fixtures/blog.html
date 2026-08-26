@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Engineering Blog - Scalable Web Services</title>
+</head>
+<body>
+    <div class="header-nav">
+        <a href="/">Home</a> | <a href="/archive">Archive</a>
+    </div>
+    <div class="sidebar-left">
+        <ul>
+            <li><a href="/cat/rust">Rust (14)</a></li>
+            <li><a href="/cat/devops">DevOps (9)</a></li>
+        </ul>
+    </div>
+    <div id="main-content" class="post-content story-body">
+        <h1>Building Resilient HTTP Microservices</h1>
+        <p>In distributed architectures, microservices communicate over network boundaries that are fundamentally unreliable.</p>
+        <p>Implementing circuit breakers, rate limiting, and backoff retries prevents cascading failures across dependent downstream services.</p>
+        <h2>Best Practices</h2>
+        <ol>
+            <li>Set strict connection and read timeouts.</li>
+            <li>Use bounded channels for backpressure.</li>
+            <li>Monitor p99 and p99.9 latency spikes.</li>
+        </ol>
+    </div>
+    <div class="footer-widget">
+        <p>Subscribe to our newsletter!</p>
+    </div>
+</body>
+</html>

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>RustCrawl Documentation - API Reference</title>
+</head>
+<body>
+    <nav class="docs-sidebar">
+        <ul>
+            <li><a href="#getting-started">Getting Started</a></li>
+            <li><a href="#configuration">Configuration</a></li>
+            <li><a href="#api-endpoints">API Endpoints</a></li>
+        </ul>
+    </nav>
+    <main class="docs-body">
+        <h1 id="overview">RustCrawl API Reference</h1>
+        <p>RustCrawl is a high-performance web-to-data engine built in Rust.</p>
+
+        <h2 id="getting-started">Getting Started</h2>
+        <p>You can run RustCrawl as a standalone CLI or as an HTTP daemon.</p>
+
+        <h2 id="api-endpoints">API Endpoints</h2>
+        <h3>POST /v1/scrape</h3>
+        <p>Accepts a JSON payload requesting page scraping and transformation.</p>
+        <pre><code class="language-json">{
+  "url": "https://example.com",
+  "formats": ["markdown", "links"]
+}</code></pre>
+    </main>
+</body>
+</html>

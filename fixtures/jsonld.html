@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSON-LD Structured Data Page</title>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "TechArticle",
+      "headline": "Building High-Throughput Scrapers in Rust",
+      "image": [
+        "https://example.com/photos/1x1/photo.jpg",
+        "https://example.com/photos/4x3/photo.jpg"
+      ],
+      "datePublished": "2026-08-25T08:00:00+08:00",
+      "dateModified": "2026-08-25T09:20:00+08:00",
+      "author": [{
+          "@type": "Person",
+          "name": "Rust Systems Team",
+          "url": "https://example.com/team"
+      }]
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "Organization",
+          "@id": "https://example.com/#org",
+          "name": "RustCrawl Corp"
+        },
+        {
+          "@type": "WebSite",
+          "@id": "https://example.com/#site",
+          "publisher": { "@id": "https://example.com/#org" }
+        }
+      ]
+    }
+    </script>
+</head>
+<body>
+    <h1>Structured Data Test</h1>
+    <p>This page embeds standard schema.org tech articles and graph arrays.</p>
+</body>
+</html>
