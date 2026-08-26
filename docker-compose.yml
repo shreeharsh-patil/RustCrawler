@@ -1,0 +1,127 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: rustcrawl-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: rustcrawl
+      POSTGRES_PASSWORD: changeme_in_production
+      POSTGRES_DB: rustcrawl_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U rustcrawl -d rustcrawl_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: rustcrawl-redis
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  minio:
+    image: minio/minio:latest
+    container_name: rustcrawl-minio
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin_password
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: rustcrawl-api
+    restart: unless-stopped
+    command: ["rustcrawl", "serve", "--mode", "distributed"]
+    environment:
+      SERVER_HOST: "0.0.0.0"
+      SERVER_PORT: "3000"
+      EXECUTION_MODE: "distributed"
+      DATABASE_URL: "postgres://rustcrawl:changeme_in_production@postgres:5432/rustcrawl_db"
+      REDIS_URL: "redis://redis:6379"
+      RESULT_STORE: "s3"
+      S3_ENDPOINT: "http://minio:9000"
+      S3_BUCKET: "rustcrawl-results"
+      S3_ACCESS_KEY: "minioadmin"
+      S3_SECRET_KEY: "minioadmin_password"
+      RUST_LOG: "info"
+    ports:
+      - "3000:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  worker-http:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: rustcrawl-worker-http
+    restart: unless-stopped
+    command: ["rustcrawl", "worker", "--type", "http", "--concurrency", "50"]
+    environment:
+      DATABASE_URL: "postgres://rustcrawl:changeme_in_production@postgres:5432/rustcrawl_db"
+      REDIS_URL: "redis://redis:6379"
+      RESULT_STORE: "s3"
+      S3_ENDPOINT: "http://minio:9000"
+      S3_BUCKET: "rustcrawl-results"
+      S3_ACCESS_KEY: "minioadmin"
+      S3_SECRET_KEY: "minioadmin_password"
+      RUST_LOG: "info"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  worker-browser:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: rustcrawl-worker-browser
+    restart: unless-stopped
+    command: ["rustcrawl", "worker", "--type", "browser", "--concurrency", "10"]
+    environment:
+      DATABASE_URL: "postgres://rustcrawl:changeme_in_production@postgres:5432/rustcrawl_db"
+      REDIS_URL: "redis://redis:6379"
+      RESULT_STORE: "s3"
+      S3_ENDPOINT: "http://minio:9000"
+      S3_BUCKET: "rustcrawl-results"
+      S3_ACCESS_KEY: "minioadmin"
+      S3_SECRET_KEY: "minioadmin_password"
+      BROWSER_ENABLED: "true"
+      BROWSER_EXECUTABLE_PATH: "/usr/bin/chromium"
+      RUST_LOG: "info"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+  redis_data:
+  minio_data:
